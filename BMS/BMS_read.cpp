@@ -6,7 +6,7 @@
 #include <BMS_read.h>
 //#include <atmega-timers.h>
 
-int readCellValue(uint16_t (*rawCellReadingptr)[12])
+int readCellValue(uint16_t rawCellReadingptr[][TOTAL_CELL_REG])
 {
 	wakeup_sleep();
 	LTC6804_adcv();
@@ -14,9 +14,10 @@ int readCellValue(uint16_t (*rawCellReadingptr)[12])
 	int8_t error = LTC6804_rdcv(0, TOTAL_STACK, rawCellReadingptr);
 	if (error == -1)
 		//TODO: Logic to retry
- 	error = 1;
+ 	error = (int) 1;
+	 return error;
 }
-int readTempValue(uint16_t (*rawTempReadingptr)[6])
+int readTempValue(uint16_t rawTempReadingptr[][TOTAL_AUX_REG])
 {
 	wakeup_sleep();
 	LTC6804_adax();
@@ -24,23 +25,30 @@ int readTempValue(uint16_t (*rawTempReadingptr)[6])
 	int8_t error = LTC6804_rdaux(0, TOTAL_STACK,rawTempReadingptr);
 	if (error == -1)
 	//TODO: Logic to retry
-	error = 1;
+	error =(int) 1;
+	return error;
 }
 
-int readStat(uint16_t (*rawStatReadingptr)[12])
+int readStat(uint16_t rawStatReadingptr[][TOTAL_STAT_REG])
 {
 	wakeup_sleep();
 	LTC6804_adstat();
 	_delay_ms(3);
 	int8_t error = LTC6804_rdstat(0, TOTAL_STACK, rawStatReadingptr);
-	
+	if (error == -1)
+	//TODO: Logic to retry
+	error =(int) 1;
+	return error;
 }
 
-int readConfig(uint8_t (*rawConfigReadingptr)[CONFIG_IN_STACK])
+int readConfig(uint8_t rawConfigReadingptr[][TOTAL_CONFIG_REG])
 {
 	wakeup_sleep();
 	int8_t error = LTC6804_rdcfg(TOTAL_STACK, rawConfigReadingptr);
-	
+	if (error == -1)
+	//TODO: Logic to retry
+	error =(int) 1;
+	return error;
 }
 
 

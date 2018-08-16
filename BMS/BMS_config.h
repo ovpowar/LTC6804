@@ -12,6 +12,12 @@
 #define GPIOS_IN_STACK 5
 #define STATUS_IN_STACK 8
 #define CONFIG_IN_STACK 8
+
+#define TOTAL_STAT_REG 8
+#define TOTAL_CELL_REG 12
+#define TOTAL_AUX_REG 6
+#define TOTAL_CONFIG_REG 8
+
 extern uint8_t CFGR[TOTAL_STACK][6];
 
 

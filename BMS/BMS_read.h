@@ -55,10 +55,10 @@ extern int DischargeChannel[TOTAL_STACK][12];
 
 // Functions
 
-int readCellValue(uint16_t *rawCellReadingptr[CELLS_IN_STACK]);
-int readTempValue(uint16_t *rawTempReadingptr[GPIOS_IN_STACK]);
-int readStat(uint16_t *rawStatReadingptr[STATUS_IN_STACK]);
-int readConfig(uint8_t *rawConfigReadingptr);
+int readCellValue(uint16_t rawCellReadingptr[][TOTAL_CELL_REG]);
+int readTempValue(uint16_t rawTempReadingptr[][TOTAL_AUX_REG]);
+int readStat(uint16_t rawStatReadingptr[][TOTAL_STAT_REG]);
+int readConfig(uint8_t rawConfigReadingptr[][TOTAL_CONFIG_REG]);
 
 int checkUnderVoltageStatus(int *underVoltageStatusptr);
 int checkOverVoltageStatus(int *underVoltageStatusptr);
