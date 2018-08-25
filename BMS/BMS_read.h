@@ -52,6 +52,8 @@ extern int thermalShutdown[TOTAL_STACK];
 extern int DischargeTimeOut[TOTAL_STACK];
 extern int DischargeChannel[TOTAL_STACK][12];
 
+extern int SOCReading[TOTAL_STACK]
+
 
 // Functions
 
@@ -60,23 +62,28 @@ int readTempValue(uint16_t rawTempReadingptr[][TOTAL_AUX_REG]);
 int readStat(uint16_t rawStatReadingptr[][TOTAL_STAT_REG]);
 int readConfig(uint8_t rawConfigReadingptr[][TOTAL_CONFIG_REG]);
 
-int checkUnderVoltageStatus(int *underVoltageStatusptr);
-int checkOverVoltageStatus(int *underVoltageStatusptr);
+int checkUnderVoltageStatus(int *underVoltageStatusptr, uint16_t rawStatReading[][STATUS_IN_STACK]);
+int checkOverVoltageStatus(int *underVoltageStatusptr, uint16_t rawStatReading[][STATUS_IN_STACK]);
 
-int checkMuxFail(int *muxFailptr);
-int checkThermalShutdown(int *thermalShutdownptr);
+int checkMuxFail(int *muxFailptr, uint16_t rawStatReading[][STATUS_IN_STACK]);
+int checkThermalShutdown(int *thermalShutdownptr, uint16_t rawStatReading[][STATUS_IN_STACK]);
 
-int readAnalogPower(int *analogPowerSupplyReadingptr);
-int readDigitalPower(int *digitalPowerSupplyReadingptr);
+int readAnalogPower(int *analogPowerSupplyReadingptr, uint16_t rawStatReading[][STATUS_IN_STACK]);
+int readDigitalPower(int *digitalPowerSupplyReadingptr, uint16_t rawStatReading[][STATUS_IN_STACK]);
 
-int readInternalTemp(int *dieReadingptr);
+int readSumVoltage(int *socReadingptr, rawStatReading[][STATUS_IN_STACK]);
+int readInternalTemp(int *dieReadingptr, uint16_t rawStatReading[][STATUS_IN_STACK]);
 
 int filterCellValue(int *rawCellReadingptr, int *cellReadingptr, int filter_mode);
 int filterTempValue(int *rawTempReadingptr, int *tempReadingptr, int filter_mode);
 int filterConfig(int *rawConfigReadingptr[6], int *configReadingptr[6]);
 
-int readBalancingSetup(int *DischargeChannelptr);
-int readBalancingTime(int *DischargeTimeptr);
+int readBalancingSetup(int *DischargeChannelptr, uint16_t rawStatReading[][STATUS_IN_STACK]);
+int readBalancingTime(int *DischargeTimeptr, uint16_t rawStatReading[][STATUS_IN_STACK]);
+
+
+uint16_t calculateStackAverage(uint16_t rawCellReadingptr[][TOTAL_CELL_REG],int  stackNumber);
+uint16_t calculatePackAverage(uint16_t rawCellReadingptr[][TOTAL_CELL_REG], int socReadingptr[TOTAL_STACK], int mode);
 
 #endif
 

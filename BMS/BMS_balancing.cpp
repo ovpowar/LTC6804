@@ -23,5 +23,33 @@ int holdBalancing(uint16_t *dischargeCode, int stackNumber)
 int verifyBalancing(uint16_t *dischargeCode, int stackNumber)
 {
 	return 0;
-	//TODO: Entire Balancing Procedure for Test
+	//TODO: Entire Balancing Procedure for Test as explained in Datasheet
+}
+
+
+uint16_t balancingAlgorithm(int status, int stackNumber)
+{
+	uint16_t rawCellReading[TOTAL_STACK][TOTAL_CELL_REG];
+	if (status == CHARGING)
+	{
+		readCellValue(rawCellReading);
+	    cellValueAverageinStack = calculateStackAverage(rawCellReading[][TOTAL_CELL_REG], stackNumber);
+		for (int i = 0; i < CELLS_IN_STACK; i++)
+		{
+			uint16_t decider = compareCell(rawCellReading[stackNumber][i], cellValueAverageinStack);
+			if (decider == 1)
+			startBalancing(&dischargeCode, i ,stackNumber);													//Confirm Logic Once
+			
+		}
+	
+	}	
+}
+
+
+uint16_t compareCell(uint16_t cellValue, uint16_t cellValueAverage) 
+{
+	if (cellValue > (cellValueAverage + DISCHARGE_THRESHOLD))	
+	return 1;
+	else
+	return 0;
 }

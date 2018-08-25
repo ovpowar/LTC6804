@@ -7,9 +7,12 @@
 #define BMS_BALANCING
 #define DISCHARGE_ON 1
 #define DISCHARGE_OFF 0
-
+#define DISCHARGE_THRESHOLD 1000
+#define CHARGING 0
+#define RUNNING 1
 
 int dischargeCode;
+int cellValueAverageinStack;
 
 //Functions declarations
 
@@ -20,4 +23,9 @@ int stopBalancing(uint16_t *dischargeCode, int dischargePin, int stackNumber);
 int holdBalancing(uint16_t *dischargeCode, int stackNumber);
 
 int verifyBalancing(uint16_t *dischargeCode, int stackNumber);
+
+uint16_t balancingAlgorithm(int status, int stackNumber);
+
+uint16_t compareCell(uint16_t cellValue, uint16_t cellValueAverage);
+
 #endif

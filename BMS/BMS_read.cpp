@@ -6,23 +6,34 @@
 #include <BMS_read.h>
 //#include <atmega-timers.h>
 
+/*!
+------------Direct Access Functions---------------
+
+The following 4 functions directly interact with the LTC6804 Code to read
+the status register.
+
+----------------------------------------------------
+*/ 
+
 int readCellValue(uint16_t rawCellReadingptr[][TOTAL_CELL_REG])
 {
 	wakeup_sleep();
-	LTC6804_adcv();
-	_delay_ms(3);
-	int8_t error = LTC6804_rdcv(0, TOTAL_STACK, rawCellReadingptr);
+	LTC6804_adcv(); //ADC Conversion start
+	_delay_ms(3); // Wait for IC to power up
+	int8_t error = LTC6804_rdcv(0, TOTAL_STACK, rawCellReadingptr);	//Read Cell Values
 	if (error == -1)
 		//TODO: Logic to retry
  	error = (int) 1;
 	 return error;
 }
+
+
 int readTempValue(uint16_t rawTempReadingptr[][TOTAL_AUX_REG])
 {
 	wakeup_sleep();
-	LTC6804_adax();
-	_delay_ms(3);
-	int8_t error = LTC6804_rdaux(0, TOTAL_STACK,rawTempReadingptr);
+	LTC6804_adax();//ADC Conversion Start
+	_delay_ms(3); // Wait for IC to power up and complete conversion
+	int8_t error = LTC6804_rdaux(0, TOTAL_STACK,rawTempReadingptr); //Read Aux Values
 	if (error == -1)
 	//TODO: Logic to retry
 	error =(int) 1;
@@ -32,9 +43,9 @@ int readTempValue(uint16_t rawTempReadingptr[][TOTAL_AUX_REG])
 int readStat(uint16_t rawStatReadingptr[][TOTAL_STAT_REG])
 {
 	wakeup_sleep();
-	LTC6804_adstat();
-	_delay_ms(3);
-	int8_t error = LTC6804_rdstat(0, TOTAL_STACK, rawStatReadingptr);
+	LTC6804_adstat();//ADC Conversion Start
+	_delay_ms(3); // Wait for IC to power up and complete conversion
+	int8_t error = LTC6804_rdstat(0, TOTAL_STACK, rawStatReadingptr); //Read Status Values
 	if (error == -1)
 	//TODO: Logic to retry
 	error =(int) 1;
@@ -44,88 +55,111 @@ int readStat(uint16_t rawStatReadingptr[][TOTAL_STAT_REG])
 int readConfig(uint8_t rawConfigReadingptr[][TOTAL_CONFIG_REG])
 {
 	wakeup_sleep();
-	int8_t error = LTC6804_rdcfg(TOTAL_STACK, rawConfigReadingptr);
+	int8_t error = LTC6804_rdcfg(TOTAL_STACK, rawConfigReadingptr);// Read Configuration Register Values
 	if (error == -1)
 	//TODO: Logic to retry
 	error =(int) 1;
 	return error;
 }
 
+/*!
+Parsing Functions
 
-int checkUnderVoltageStatus(int *underVoltageStatusptr)
+The following functions only parse the value read in the status register into
+different variables based on type of status value
+
+*/ 
+
+
+int checkUnderVoltageStatus(int *underVoltageStatusptr, uint16_t rawStatReading[][STATUS_IN_STACK])
 {
 	for (int stackNumber = 0; stackNumber<TOTAL_STACK; stackNumber++)
 	{
-		*(underVoltageStatusptr+stackNumber) = rawStatReading[stackNumber][UNDERVOLTAGE_CHANNEL];
+		*(underVoltageStatusptr+stackNumber) = (int) *(rawStatReading + (stackNumber*STATUS_IN_STACK)+UNDERVOLTAGE_CHANNEL);
 	}
 }
 
-int checkOverVoltageStatus(int *overVoltageStatusptr)
+int checkOverVoltageStatus(int *overVoltageStatusptr, uint16_t rawStatReading[][STATUS_IN_STACK])
 {
 	for (int stackNumber = 0; stackNumber<TOTAL_STACK; stackNumber++)
 	{
-		*(overVoltageStatusptr+stackNumber) = rawStatReading[stackNumber][OVERVOLTAGE_CHANNEL];
+		*(overVoltageStatusptr+stackNumber) = (int) *(rawStatReading+(stackNumber*STATUS_IN_STACK)+OVERVOLTAGE_CHANNEL);
 	}
 }
 
-int checkMuxFail(int *muxFailptr)
+int checkMuxFail(int *muxFailptr, uint16_t rawStatReading[][STATUS_IN_STACK])
 {
 	for (int stackNumber = 0; stackNumber<TOTAL_STACK; stackNumber++)
 	{
-		*(muxFailptr+stackNumber) = rawStatReading[stackNumber][MUXFAIL_CHANNEL];		
+		*(muxFailptr+stackNumber) = (int) *(rawStatReading+(stackNumber*STATUS_IN_STACK)+MUXFAIL_CHANNEL);		
 	}
 	
 }
-int checkThermalShutdown(int *thermalShutdownptr)
+int checkThermalShutdown(int *thermalShutdownptr, uint16_t rawStatReading[][STATUS_IN_STACK])
 {
 	for (int stackNumber = 0; stackNumber<TOTAL_STACK; stackNumber++)
 	{	
-		*(thermalShutdownptr+stackNumber) = rawStatReading[stackNumber][THSD_CHANNEL];
+		*(thermalShutdownptr+stackNumber) = (int) *(rawStatReading+(stackNumber*STATUS_IN_STACK)+THSD_CHANNEL);
 	}
 }
 
-int readAnalogPower(int *analogPowerSupplyReadingptr)
+int readAnalogPower(int *analogPowerSupplyReadingptr, uint16_t rawStatReading[][STATUS_IN_STACK])
 {
 	for (int stackNumber = 0; stackNumber<TOTAL_STACK; stackNumber++)
 	{
-		*(analogPowerSupplyReadingptr+stackNumber) = rawStatReading[stackNumber][ANALOG_VOLTAGE_CHANNEL];
+		*(analogPowerSupplyReadingptr+stackNumber) = (int) *(rawStatReading+(stackNumber*STATUS_IN_STACK) + ANALOG_VOLTAGE_CHANNEL);
 	}
 }
 int readDigitalPower(int *digitalPowerSupplyReadingptr)
 {
 	for (int stackNumber = 0; stackNumber<TOTAL_STACK; stackNumber++)
 	{
-		*(digitalPowerSupplyReadingptr+stackNumber) = rawStatReading[stackNumber][DIGITAL_VOLTAGE_CHANNEL];
+		*(digitalPowerSupplyReadingptr+stackNumber) = (int) *(rawStatReading+(stackNumber*STATUS_IN_STACK) + DIGITAL_VOLTAGE_CHANNEL);
 	}
 }
 
-int readInternalTemp(int *dieReadingptr)
+int readSumVoltage(int *socReadingptr, uint16_t rawStatReading[][STATUS_IN_STACK])
 {
 	for (int stackNumber = 0; stackNumber<TOTAL_STACK; stackNumber++)
 	{
-		*(dieReadingptr+stackNumber) = rawStatReading[stackNumber][ITMP_CHANNEL];
+		*(socReadingptr+stackNumber) = (int) *(rawStatReading+(stackNumber*STATUS_IN_STACK) + SOC_CHANNEL);
 	}
 }
 
-int readBalancingSetup(int *dischargeChannelptr)
+
+int readInternalTemp(int *dieReadingptr, uint16_t rawStatReading[][STATUS_IN_STACK])
+{
+	for (int stackNumber = 0; stackNumber<TOTAL_STACK; stackNumber++)
+	{
+		*(dieReadingptr+stackNumber) = (int) *(rawStatReading+(stackNumber*STATUS_IN_STACK) + ITMP_CHANNEL);
+	}
+}
+
+int readBalancingSetup(int *dischargeChannelptr, uint16_t ConfigReading[][CONFIG_IN_STACK])
 {
 	for (int stackNumber = 0; stackNumber<TOTAL_STACK;stackNumber++)
 	{
-		*(dischargeChannelptr+stackNumber) = configReading[stackNumber][DISCHARGE_CHANNEL];
+		*(dischargeChannelptr+stackNumber) =(int) *(configReading+(stackNumber*CONFIG_IN_STACK)+DISCHARGE_CHANNEL);
 	}	
 	
 }
 
-int readBalancingTime(int *DischargeTimeOutptr)
+int readBalancingTime(int *DischargeTimeOutptr, uint16_t configReading[][CONFIG_IN_STACK])
 {
 	for (int stackNumber = 0; stackNumber<TOTAL_STACK;stackNumber++)
 	{
-		*(DischargeTimeOutptr+stackNumber) = configReading[stackNumber][DCTO_CHANNEL];
+		*(DischargeTimeOutptr+stackNumber) =(int) *(configReading+(stackNumber*CONFIG_IN_STACK) + DCTO_CHANNEL);
 	}
 	
 }
 
+/*!
 
+Filter Functions
+
+Following Functions filter the raw cell, temperature and cofiguration reading
+
+*/
 int filterCellValue(uint16_t *rawCellReadingptr, int *cellReadingptr, int filter_mode)
 {
 	if (filter_mode == DIRECT_PASS)
@@ -168,3 +202,54 @@ int filterConfig(uint16_t *rawConfigReadingptr[6], int *configReadingptr[6])
 	}
 }
 
+/*!
+
+Math Functions
+
+These Functions perform various Math operations on the obtained data
+
+*/
+
+uint16_t calculateStackAverage(uint16_t rawCellReadingptr[][TOTAL_CELL_REG],int  stackNumber)
+{
+	int sum = 0;
+	
+	for (int i=0; i<CELLS_IN_STACK;i++)
+	{
+		sum = sum + rawCellReadingptr[stackNumber][i];
+	}
+	uint16_t averageCellValue = sum/CELLS_IN_STACK;
+	return averageCellValue;
+}
+
+
+uint16_t calculatePackAverage(uint16_t rawCellReadingptr[][TOTAL_CELL_REG], int socReadingptr[TOTAL_STACK], int mode)
+{
+		
+	int sum = 0;
+	for (int i = 0; i<TOTAL_STACK; i++)
+	{	
+		if (mode == 0)													//Mode 0: Sum of individual cells
+		{																//Function is slow but accurate
+																		//Might fail if open cell value is read. Take care while calling function
+			for (int j=0; j<CELLS_IN_STACK;j++)
+			{
+				sum = sum + rawCellReadingptr[i][j];		
+			}
+		}
+		else if (mode == 1)												//Mode 1: Sum of individual stacks
+		{																//Function is fast but can be inaccurate
+			sum = sum + socReadingptr[i];								//Will fail if total value is wrong. Take care while calling function 
+		}
+		else
+		return -1;
+	}
+	
+	uint16_t averageCellValue;
+	if (mode == 0)
+		averageCellValue = sum/(TOTAL_STACK*CELLS_IN_STACK);
+	else if (mode == 1)
+		averageCellValue = sum/(TOTAL_STACK);
+	
+	return averageCellValue;
+}
